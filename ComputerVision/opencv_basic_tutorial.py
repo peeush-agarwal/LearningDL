@@ -22,12 +22,12 @@ def get_filename_and_extension(filename):
     return split_parts[0], split_parts[1]
 
 def get_filename_gray(filename):
-    """ Return filename => 'Result\{filename}_gray.jpg' """
+    """ Return filename => 'Result\\{filename}_gray.jpg' """
     filename, extension = get_filename_and_extension(filename)
     return f'Results\\{filename}_gray.{extension}'
 
 def get_filename_rgb(filename):
-    """ Return filename => 'Result\{filename}_rgb.jpg' """
+    """ Return filename => 'Result\\{filename}_rgb.jpg' """
     filename, extension = get_filename_and_extension(filename)
     return f'Results\\{filename}_rgb.{extension}'
 
