@@ -21,21 +21,34 @@ def get_filename_and_extension(filename):
     split_parts = path.name.split('.')
     return split_parts[0], split_parts[1]
 
-def save_image_gray(filename):
-    """ Save a gray-scale image for file """
-    gray_image = cv2.imread(filename, 0)
+def get_filename_gray(filename):
+    """ Return filename => 'Result\{filename}_gray.jpg' """
     filename, extension = get_filename_and_extension(filename)
-    new_filename = f'Result\\{filename}_gray.{extension}'
+    return f'Results\\{filename}_gray.{extension}'
+
+def get_filename_rgb(filename):
+    """ Return filename => 'Result\{filename}_rgb.jpg' """
+    filename, extension = get_filename_and_extension(filename)
+    return f'Results\\{filename}_rgb.{extension}'
+
+def save_image_gray(img, filename):
+    """ Save a gray-scale image for file """
+    gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    new_filename = get_filename_gray(filename)
     cv2.imwrite(new_filename, gray_image)
     print('Gray image saved at '+ new_filename)
+
+def save_image_rgb(img, filename):
+    """ Save a RGB-scale image for file """
+    rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    new_filename = get_filename_rgb(filename)
+    cv2.imwrite(new_filename, rgb_image)
+    print('RGB image saved at '+ new_filename)
 
 # cv2.IMREAD_COLOR(1) : Loads a color image. Any transparency of image will be neglected.
 #   It is the default flag.
 # cv2.IMREAD_GRAYSCALE(0) : Loads image in grayscale mode
 # cv2.IMREAD_UNCHANGED(-1) : Loads image as such including alpha channel
-
-# Note: OpenCV reads the image in BGR format
-
 
 def main(argv):
     """ Read, show and save image using openCV """
@@ -55,7 +68,8 @@ def main(argv):
 
     img = init_image(filename)
     show_image(img)
-    save_image_gray(filename)
+    save_image_gray(img, filename)
+    save_image_rgb(img, filename)
 
     print('End of program')
 
