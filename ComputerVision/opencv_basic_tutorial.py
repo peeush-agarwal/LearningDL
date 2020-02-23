@@ -8,19 +8,21 @@ def init_image(filename):
     """ Read an image from file """
     return cv2.imread(filename)
 
-def show_image(img):
+def show_image(img, image_name='image'):
     """ Show image from image object """
-    cv2.namedWindow('image', cv2.WINDOW_NORMAL)
-    cv2.imshow('image', img)
+    cv2.namedWindow(image_name, cv2.WINDOW_NORMAL)
+    cv2.imshow(image_name, img)
     cv2.waitKey(0) #Press q to close the image
     cv2.destroyAllWindows()
 
 def display_image_size(img):
     """ Display image size """
     dim = img.shape
+    print(dim)
     print(f'Height: {dim[0]}')
     print(f'Width: {dim[1]}')
-    print(f'Channels: {dim[2]}')
+    if len(dim) == 3:
+        print(f'Channels: {dim[2]}')
 
 def resize_image(img, scale_percent):
     """ Resize image size """
@@ -85,6 +87,24 @@ def apply_adaptive_thresholding(img, adaptive_threshold_type=cv2.ADAPTIVE_THRESH
     """ Apply Adaptive thresholding on the image """
     return cv2.adaptiveThreshold(img, 255, adaptive_threshold_type, cv2.THRESH_BINARY, 11, 2)
 
+def find_contours_in_image(img):
+    """ Finds contours in the given image. In OpenCV, finding contours is like finding white object
+    from black background. So remember, object to be found should be white and background should be
+     black.
+    cv2.CHAIN_APPROX_NONE => stores all boundary points for the contour, while
+    cv2.CHAIN_APPROX_SIMPLE => stores only required points to draw boundary/contour.
+    """
+    return cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+def draw_contours(img):
+    """ Draw contours for edge """
+    contours, _ = find_contours_in_image(img)
+    print('Printing contours')
+    for c_item in contours:
+        print(len(c_item))
+        cv2.drawContours(img, [c_item], -1, (0, 0, 255), 2)
+        show_image(img, image_name='final')
+
 # cv2.IMREAD_COLOR(1) : Loads a color image. Any transparency of image will be neglected.
 #   It is the default flag.
 # cv2.IMREAD_GRAYSCALE(0) : Loads image in grayscale mode
@@ -112,19 +132,22 @@ def main(argv):
     img_gray = save_image_gray(img, filename)
     _ = save_image_rgb(img, filename)
 
-    resized = resize_image(img, 10)
-    # show_image(resized)
+    resized = resize_image(img_gray, 10)
     display_image_size(resized)
 
-    show_image(img_gray)
+    show_image(resized)
 
-    img_blurred = apply_gaussian_blur(img_gray, (5, 5))
+    img_blurred = apply_gaussian_blur(resized, (5, 5))
     show_image(img_blurred)
 
     show_image(apply_thresholding(img_blurred))
 
     show_image(apply_adaptive_thresholding(img_blurred))
-    show_image(apply_adaptive_thresholding(img_blurred, adaptive_threshold_type=cv2.ADAPTIVE_THRESH_MEAN_C))
+    img_thresholded = apply_adaptive_thresholding(img_blurred,\
+        adaptive_threshold_type=cv2.ADAPTIVE_THRESH_MEAN_C)
+    show_image(img_thresholded)
+
+    draw_contours(img_thresholded)
 
     print('End of program')
 
