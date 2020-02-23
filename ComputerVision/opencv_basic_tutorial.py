@@ -15,6 +15,20 @@ def show_image(img):
     cv2.waitKey(0) #Press q to close the image
     cv2.destroyAllWindows()
 
+def display_image_size(img):
+    """ Display image size """
+    dim = img.shape
+    print(f'Height: {dim[0]}')
+    print(f'Width: {dim[1]}')
+    print(f'Channels: {dim[2]}')
+
+def resize_image(img, scale_percent):
+    """ Resize image size """
+    dim = img.shape
+    width = int(dim[1]*scale_percent/100)
+    height = int(dim[0]*scale_percent/100)
+    return cv2.resize(img, (width, height), interpolation=cv2.INTER_AREA)
+
 def get_filename_and_extension(filename):
     """ Filename('dog.jpg') => 'dog', 'jpg' """
     path = Path(filename)
@@ -48,14 +62,28 @@ def save_image_format(img, filename, format_value):
     new_filename = get_filename_from_format(format_value, filename)
     cv2.imwrite(new_filename, formatted_image)
     print('Image saved at '+ new_filename)
+    return formatted_image
 
 def save_image_gray(img, filename):
     """ Save a gray-scale image for file """
-    save_image_format(img, filename, cv2.COLOR_BGR2GRAY)
+    return save_image_format(img, filename, cv2.COLOR_BGR2GRAY)
 
 def save_image_rgb(img, filename):
     """ Save a RGB-scale image for file """
-    save_image_format(img, filename, cv2.COLOR_BGR2RGB)
+    return save_image_format(img, filename, cv2.COLOR_BGR2RGB)
+
+def apply_gaussian_blur(img, filter_size):
+    """ Apply Gaussian blur on the image """
+    return cv2.GaussianBlur(img, filter_size, 0)
+
+def apply_thresholding(img, threshold=127, max_value=255, threshold_type=cv2.THRESH_BINARY):
+    """ Apply Simple thresholding on image """
+    _, thresh = cv2.threshold(img, threshold, max_value, threshold_type)
+    return thresh
+
+def apply_adaptive_thresholding(img, adaptive_threshold_type=cv2.ADAPTIVE_THRESH_GAUSSIAN_C):
+    """ Apply Adaptive thresholding on the image """
+    return cv2.adaptiveThreshold(img, 255, adaptive_threshold_type, cv2.THRESH_BINARY, 11, 2)
 
 # cv2.IMREAD_COLOR(1) : Loads a color image. Any transparency of image will be neglected.
 #   It is the default flag.
@@ -79,9 +107,24 @@ def main(argv):
     print('Image filename :', filename)
 
     img = init_image(filename)
+    display_image_size(img)
     show_image(img)
-    save_image_gray(img, filename)
-    save_image_rgb(img, filename)
+    img_gray = save_image_gray(img, filename)
+    _ = save_image_rgb(img, filename)
+
+    resized = resize_image(img, 10)
+    # show_image(resized)
+    display_image_size(resized)
+
+    show_image(img_gray)
+
+    img_blurred = apply_gaussian_blur(img_gray, (5, 5))
+    show_image(img_blurred)
+
+    show_image(apply_thresholding(img_blurred))
+
+    show_image(apply_adaptive_thresholding(img_blurred))
+    show_image(apply_adaptive_thresholding(img_blurred, adaptive_threshold_type=cv2.ADAPTIVE_THRESH_MEAN_C))
 
     print('End of program')
 
