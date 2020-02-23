@@ -21,29 +21,40 @@ def get_filename_and_extension(filename):
     split_parts = path.name.split('.')
     return split_parts[0], split_parts[1]
 
+def get_filename_format(filename, format_name):
+    """ Return filename => 'Result\\{filename}_{format_name}.jpg' """
+    filename, extension = get_filename_and_extension(filename)
+    return f'Results\\{filename}_{format_name}.{extension}'
+
 def get_filename_gray(filename):
     """ Return filename => 'Result\\{filename}_gray.jpg' """
-    filename, extension = get_filename_and_extension(filename)
-    return f'Results\\{filename}_gray.{extension}'
+    return get_filename_format(filename, 'gray')
 
 def get_filename_rgb(filename):
     """ Return filename => 'Result\\{filename}_rgb.jpg' """
-    filename, extension = get_filename_and_extension(filename)
-    return f'Results\\{filename}_rgb.{extension}'
+    return get_filename_format(filename, 'rgb')
+
+def get_filename_from_format(format_value, filename):
+    if format_value == cv2.COLOR_BGR2GRAY:
+        return get_filename_gray(filename)
+    if format_value == cv2.COLOR_BGR2RGB:
+        return get_filename_rgb(filename)
+    raise f'{format_value} not supported yet'
+
+def save_image_format(img, filename, format_value):
+    """ Save a other-format image for file """
+    formatted_image = cv2.cvtColor(img, format_value)
+    new_filename = get_filename_from_format(format_value, filename)
+    cv2.imwrite(new_filename, formatted_image)
+    print('Image saved at '+ new_filename)
 
 def save_image_gray(img, filename):
     """ Save a gray-scale image for file """
-    gray_image = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    new_filename = get_filename_gray(filename)
-    cv2.imwrite(new_filename, gray_image)
-    print('Gray image saved at '+ new_filename)
+    save_image_format(img, filename, cv2.COLOR_BGR2GRAY)
 
 def save_image_rgb(img, filename):
     """ Save a RGB-scale image for file """
-    rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    new_filename = get_filename_rgb(filename)
-    cv2.imwrite(new_filename, rgb_image)
-    print('RGB image saved at '+ new_filename)
+    save_image_format(img, filename, cv2.COLOR_BGR2RGB)
 
 # cv2.IMREAD_COLOR(1) : Loads a color image. Any transparency of image will be neglected.
 #   It is the default flag.
