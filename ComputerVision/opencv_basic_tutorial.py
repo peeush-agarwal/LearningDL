@@ -35,6 +35,7 @@ def get_filename_rgb(filename):
     return get_filename_format(filename, 'rgb')
 
 def get_filename_from_format(format_value, filename):
+    """ Return filename according to format value """
     if format_value == cv2.COLOR_BGR2GRAY:
         return get_filename_gray(filename)
     if format_value == cv2.COLOR_BGR2RGB:
