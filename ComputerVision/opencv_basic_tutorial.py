@@ -1,5 +1,5 @@
 """ Basic tutorial to read and write Image using OpenCV """
-import os
+from pathlib import Path
 import sys
 import getopt
 import cv2
@@ -15,13 +15,17 @@ def show_image(img):
     cv2.waitKey(0) #Press q to close the image
     cv2.destroyAllWindows()
 
+def get_filename_and_extension(filename):
+    """ Filename('dog.jpg') => 'dog', 'jpg' """
+    path = Path(filename)
+    split_parts = path.name.split('.')
+    return split_parts[0], split_parts[1]
+
 def save_image_gray(filename):
     """ Save a gray-scale image for file """
-    split_parts = os.path.splitext(filename)
-    filename_without_ext = split_parts[0]
-    extension = split_parts[1]
     gray_image = cv2.imread(filename, 0)
-    new_filename = f'{filename_without_ext}_gray{extension}'
+    filename, extension = get_filename_and_extension(filename)
+    new_filename = f'Result\\{filename}_gray.{extension}'
     cv2.imwrite(new_filename, gray_image)
     print('Gray image saved at '+ new_filename)
 
