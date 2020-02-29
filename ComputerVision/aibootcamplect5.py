@@ -18,7 +18,8 @@ if __name__ == '__main__':
     # image_proc_pipeline(img)
     # exit(0)
 
-    cap = cv2.VideoCapture(r'Data/People.mp4')
+    # cap = cv2.VideoCapture(r'Data/People.mp4')
+    cap = cv2.VideoCapture(0)
 
     while(cap.isOpened()):
         ret, frame = cap.read()
