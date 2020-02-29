@@ -1,3 +1,4 @@
 learning_env/**
 .vscode/**/**
 ComputerVision/Results/**
+ComputerVision/__pycache__/**
