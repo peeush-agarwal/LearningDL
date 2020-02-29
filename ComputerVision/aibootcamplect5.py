@@ -14,11 +14,11 @@ def image_proc_pipeline(img):
     return resized, edges
 
 if __name__ == '__main__':
-    img = cv2.imread(r'Data/dog.jpg')
-    image_proc_pipeline(img)
-    exit(0)
+    # img = cv2.imread(r'Data/dog.jpg')
+    # image_proc_pipeline(img)
+    # exit(0)
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(r'Data/People.mp4')
 
     while(cap.isOpened()):
         ret, frame = cap.read()
@@ -27,9 +27,12 @@ if __name__ == '__main__':
             resized, result = image_proc_pipeline(frame)
 
             cv2.imshow("resized", resized)
-            cv2.imshow("edge detection", result)
+            cv2.imshow("result", result)
             # cv2.imshow("cv2 resized", resized_cv2)
             # cv2.waitKey(0)
+            if cv2.waitKey(25) & 0xFF == ord('q'):
+                break
+
         else:
             break
     
