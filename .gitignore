@@ -2,3 +2,4 @@ learning_env/**
 .vscode/**/**
 ComputerVision/Results/**
 ComputerVision/__pycache__/**
+Pytorch/Data/cifar**
