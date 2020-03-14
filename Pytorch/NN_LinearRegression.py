@@ -2,6 +2,7 @@
 
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
 import torch
 import torchvision.transforms as transforms
 import torch.nn as nn
@@ -76,13 +77,20 @@ class FeedForwardNN(nn.Module):
         return output
 
 data = pd.read_csv('Data/iris.csv')
-print(data.head())
+print(data.shape)
+
+data_train, data_test = train_test_split(data, test_size=0.3, shuffle=True)
+print(data_train.shape)
+print(data_test.shape)
 
 feature_cols = ['sepal_length', 'sepal_width', 'petal_length']
 label_col = ['petal_width']
 
-dataset = TabularDataset(data = data, feature_cols=feature_cols, label_col=label_col)
-dataloader = DataLoader(dataset, batch_size=4, shuffle=True,num_workers=0)
+train_dataset = TabularDataset(data = data_train, feature_cols=feature_cols, label_col=label_col)
+test_dataset = TabularDataset(data = data_test, feature_cols=feature_cols, label_col=label_col)
+
+trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True,num_workers=0)
+testloader = DataLoader(test_dataset, batch_size=4, shuffle=False,num_workers=0)
 
 device = get_device()
 
@@ -90,22 +98,45 @@ model = FeedForwardNN(n_features=3,n_labels=1).to(device)
 
 no_of_epochs = 5
 criterion = nn.MSELoss()
-optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
-for epoch in range(no_of_epochs):
-    running_loss = None
-    for features, y in dataloader:
-        features = features.to(device)
-        y  = y.to(device)
+optimizer = optim.SGD(model.parameters(), lr=0.01)
 
-        # Forward Pass
-        preds = model(features)
-        loss = criterion(preds, y)
+def train(model, trainloader):
+  for epoch in range(no_of_epochs):
+      running_loss = 0
+      for features, y in trainloader:
+          features = features.to(device)
+          y  = y.to(device)
 
-        running_loss = loss
+          # set the parameter gradients to zero
+          optimizer.zero_grad()
 
-        # Backward Pass and Optimization
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-    
-    print(f'Epoch:{epoch} running_loss:{running_loss}')
+          # Forward Pass
+          preds = model(features)
+
+          loss = criterion(preds, y)
+          
+          # Backward Pass
+          loss.backward()
+
+          # Update the gradients
+          optimizer.step()
+      
+          running_loss += loss.item()
+      print('[Epoch %d] loss:%.3f' % (epoch+1, running_loss/len(trainloader)))
+  print('Training completed')
+
+def test(model, testloader):
+  with torch.no_grad():
+    running_loss = 0
+    for features, y in testloader:
+      features = features.to(device)
+      y  = y.to(device)
+      
+      preds = model(features)
+      
+      loss = criterion(preds, y)
+      running_loss += loss.item()
+    print('Test-data Loss:%.3f' % (running_loss/len(testloader)))
+
+train(model, trainloader)
+test(model, testloader)
