@@ -1,6 +1,5 @@
 """ Basic Neural network from scratch """
 
-import sys
 import pandas as pd
 import numpy as np
 import torch
@@ -10,8 +9,11 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
 
-# Use Pytorch GPU
-device = torch.device('cuda')
+def get_device():
+  device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+  print(device)
+  device = 'cpu' # 'cuda' gives error "RuntimeError: CUDA error: no kernel image is available for execution on the device"
+  return device
 
 # DataLoader - It will load data from disk to CPU or GPU for training
 class TabularDataset(Dataset):
@@ -82,9 +84,7 @@ label_col = ['petal_width']
 dataset = TabularDataset(data = data, feature_cols=feature_cols, label_col=label_col)
 dataloader = DataLoader(dataset, batch_size=4, shuffle=True,num_workers=0)
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(device)
-device = 'cpu' # 'cuda' gives error "RuntimeError: CUDA error: no kernel image is available for execution on the device"
+device = get_device()
 
 model = FeedForwardNN(n_features=3,n_labels=1).to(device)
 
