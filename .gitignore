@@ -3,3 +3,5 @@ learning_env/**
 ComputerVision/Results/**
 ComputerVision/__pycache__/**
 Pytorch/Data/cifar**
+Pytorch/__pycache__/**
+ComputerVision/Data/Nature_merge.avi
