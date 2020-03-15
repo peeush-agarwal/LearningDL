@@ -9,6 +9,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.data import Dataset, DataLoader
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 def get_device():
   device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -76,31 +78,25 @@ class FeedForwardNN(nn.Module):
 
         return output
 
-data = pd.read_csv('Data/iris.csv')
-print(data.shape)
+def visualize_data(data):
+  """
+  Exploratory Data Analysis (EDA)
 
-data_train, data_test = train_test_split(data, test_size=0.3, shuffle=True)
-print(data_train.shape)
-print(data_test.shape)
+  describe() => Continuous variables description
+  value_counts() => Gives distribution of category in species
+  pairplot() => Plots the Bivariate relationship from data
+  """
+  print('Data description:')
+  print(data.describe())
+  print('Species value counts:')
+  print(data['species'].value_counts())
+  print('Bivariate pairwise plots:')
+  sns.pairplot(data, hue='species', diag_kind='kde')
+  plt.show()
 
-feature_cols = ['sepal_length', 'sepal_width', 'petal_length']
-label_col = ['petal_width']
-
-train_dataset = TabularDataset(data = data_train, feature_cols=feature_cols, label_col=label_col)
-test_dataset = TabularDataset(data = data_test, feature_cols=feature_cols, label_col=label_col)
-
-trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True,num_workers=0)
-testloader = DataLoader(test_dataset, batch_size=4, shuffle=False,num_workers=0)
-
-device = get_device()
-
-model = FeedForwardNN(n_features=3,n_labels=1).to(device)
-
-no_of_epochs = 5
-criterion = nn.MSELoss()
-optimizer = optim.SGD(model.parameters(), lr=0.01)
-
-def train(model, trainloader):
+def train(model, trainloader, criterion, device):
+  optimizer = optim.SGD(model.parameters(), lr=0.01)
+  no_of_epochs = 10
   for epoch in range(no_of_epochs):
       running_loss = 0
       for features, y in trainloader:
@@ -125,7 +121,7 @@ def train(model, trainloader):
       print('[Epoch %d] loss:%.3f' % (epoch+1, running_loss/len(trainloader)))
   print('Training completed')
 
-def test(model, testloader):
+def test(model, testloader, criterion, device):
   with torch.no_grad():
     running_loss = 0
     for features, y in testloader:
@@ -138,5 +134,32 @@ def test(model, testloader):
       running_loss += loss.item()
     print('Test-data Loss:%.3f' % (running_loss/len(testloader)))
 
-train(model, trainloader)
-test(model, testloader)
+def main():
+  data = pd.read_csv('Data/iris.csv')
+
+  # visualize_data(data)
+
+  data_train, data_test = train_test_split(data, test_size=0.3, shuffle=True, random_state = 43)
+  print(data_train.shape)
+  print(data_test.shape)
+
+  feature_cols = ['sepal_length', 'sepal_width', 'petal_length']
+  label_col = ['petal_width']
+
+  train_dataset = TabularDataset(data = data_train, feature_cols=feature_cols, label_col=label_col)
+  test_dataset = TabularDataset(data = data_test, feature_cols=feature_cols, label_col=label_col)
+
+  trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True,num_workers=0)
+  testloader = DataLoader(test_dataset, batch_size=4, shuffle=False,num_workers=0)
+
+  device = get_device()
+
+  model = FeedForwardNN(n_features=3,n_labels=1).to(device)
+
+  criterion = nn.MSELoss()
+
+  train(model, trainloader, criterion, device)
+  test(model, testloader, criterion, device)
+
+if __name__ == "__main__":
+  main()
