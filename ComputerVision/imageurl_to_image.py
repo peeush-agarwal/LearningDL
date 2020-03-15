@@ -26,9 +26,9 @@ def __url_to_image_scikit__(url):
 def get_image_from_url(url, method = None):
     ''' Get OpenCV image directly from url. '''
     if method is None:
-        return __url_to_image_scikit__(url)
+        method = __url_to_image_scikit__
 
-    return __url_to_image__(url)
+    return method(url)
 
 
 if __name__ == "__main__":
@@ -40,6 +40,10 @@ if __name__ == "__main__":
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
-    img = get_image_from_url(url, method='xyz')
+    img = get_image_from_url(url)
+    cv2.imshow('image', img)
+    cv2.waitKey(0)
+
+    img = get_image_from_url(url, method=__url_to_image__)
     cv2.imshow('image', img)
     cv2.waitKey(0)
