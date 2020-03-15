@@ -20,7 +20,13 @@ def get_device():
 
 # DataLoader - It will load data from disk to CPU or GPU for training
 class TabularDataset(Dataset):
-  def __init__(self, data, feature_cols=None, label_col=None):
+  def __init__(self, X, y):
+    self.n = X.shape[0]
+    self.X = X
+    self.y = y
+    
+  @classmethod
+  def from_dataframe(cls, data, feature_cols=None, label_col=None):
     """
     Characterizes a Dataset for PyTorch
 
@@ -42,17 +48,19 @@ class TabularDataset(Dataset):
       provided.
     """
 
-    self.n = data.shape[0]
+    n = data.shape[0]
 
     if label_col:
-      self.y = data[label_col].astype(np.float32).values.reshape(-1, 1)
+      y = data[label_col].astype(np.float32).values.reshape(-1, 1)
     else:
-      self.y =  np.zeros((self.n, 1))
+      y =  np.zeros((self.n, 1))
 
     if feature_cols:
-      self.X = data[feature_cols].astype(np.float32).values
+      X = data[feature_cols].astype(np.float32).values
     else:
-      self.X = np.zeros((self.n, 1))
+      X = np.zeros((self.n, 1))
+    return cls(X, y)
+
 
   def __len__(self):
     """
@@ -68,7 +76,7 @@ class TabularDataset(Dataset):
 
 class FeedForwardNN(nn.Module):
     def __init__(self, n_features, n_labels = 1):
-        super().__init__()
+        super(FeedForwardNN, self).__init__()
         self.fc1 = nn.Linear(n_features, 10)
         self.fc2 = nn.Linear(10, n_labels)
     
@@ -146,8 +154,8 @@ def main():
   feature_cols = ['sepal_length', 'sepal_width', 'petal_length']
   label_col = ['petal_width']
 
-  train_dataset = TabularDataset(data = data_train, feature_cols=feature_cols, label_col=label_col)
-  test_dataset = TabularDataset(data = data_test, feature_cols=feature_cols, label_col=label_col)
+  train_dataset = TabularDataset.from_dataframe(data = data_train, feature_cols=feature_cols, label_col=label_col)
+  test_dataset = TabularDataset.from_dataframe(data = data_test, feature_cols=feature_cols, label_col=label_col)
 
   trainloader = DataLoader(train_dataset, batch_size=4, shuffle=True,num_workers=0)
   testloader = DataLoader(test_dataset, batch_size=4, shuffle=False,num_workers=0)
